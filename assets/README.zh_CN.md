@@ -32,6 +32,16 @@
 - `main/profile_images.c`：由 `tools/generate_profile_images.py` 生成的 RGB565
   衍生资源，仅包含 72 × 96 完整人物头像，供 240 × 320 屏幕使用。
 
+### 真机照片
+
+- `screenshots/ai-passport-home-closeup.jpg`：README 主图，展示真机上的个人
+  Passport 首页和 AB-731 应用入口。
+- `screenshots/ai-passport-home-handheld.jpg`：README 真机展示中的手持近景。
+- `screenshots/ai-passport-wearable-view.jpg`：README 图集和 GitHub 个人首页使用的
+  完整穿戴设备照片。
+- 三张照片均由项目所有者提供并授权公开用于本项目；发布前已缩放为
+  1350 × 1800，并清除 EXIF、设备型号和 GPS 位置信息。
+
 ## 音乐与音效（music）
 
 可复用的音乐与音效源码放在 `music/`。

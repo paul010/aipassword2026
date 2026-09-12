@@ -4,7 +4,9 @@
 
 # AI Passport 2026
 
-![AB-731 应用示意图](assets/publish/ab731-cover-illustration.png)
+<p align="center">
+  <img src="assets/screenshots/ai-passport-home-closeup.jpg" width="420" alt="AI Passport 2026 真机运行画面">
+</p>
 
 这是我的第三个开源项目：为 FoloToy AI Passport 制作的个人主页与可扩展应用入口。
 开机先显示完整头像、创作者身份、日期、时间和电量，下面可以选择进入自己开发的
@@ -21,6 +23,21 @@
 - 四个答案始终同时可见，上/下键只移动一个高亮选项。
 - 支持即时解析、错题重练、正确率统计和本地进度保存。
 - 完全离线、三键操作，无需登录账号。
+
+## 真机展示
+
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <img src="assets/screenshots/ai-passport-home-handheld.jpg" alt="手持 AI Passport 2026 个人主页"><br>
+      <sub>个人 Passport 首页与 AB-731 应用入口</sub>
+    </td>
+    <td width="50%" align="center">
+      <img src="assets/screenshots/ai-passport-wearable-view.jpg" alt="桌面上的完整 AI Passport 穿戴设备"><br>
+      <sub>实际运行中的完整穿戴设备</sub>
+    </td>
+  </tr>
+</table>
 
 ## 按键
 

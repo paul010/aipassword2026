@@ -4,7 +4,9 @@
 
 # AI Passport 2026
 
-![AB-731 app illustration](assets/publish/ab731-cover-illustration.png)
+<p align="center">
+  <img src="assets/screenshots/ai-passport-home-closeup.jpg" width="420" alt="AI Passport 2026 running on the wearable device">
+</p>
 
 My third open-source project: a personal home screen and expandable app launcher
 for the FoloToy AI Passport. It shows a full portrait, creator identity, date,
@@ -22,6 +24,21 @@ measured from July 22, 2026. They are learning material, not live exam items.
 - All four choices remain visible while `UP` and `DOWN` move one highlight.
 - Immediate explanations, mistake review, accuracy tracking, and saved progress.
 - Fully offline use with three physical buttons and no account required.
+
+## Real-device gallery
+
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <img src="assets/screenshots/ai-passport-home-handheld.jpg" alt="AI Passport 2026 home screen held in hand"><br>
+      <sub>Personal Passport home and AB-731 app entry</sub>
+    </td>
+    <td width="50%" align="center">
+      <img src="assets/screenshots/ai-passport-wearable-view.jpg" alt="Full wearable AI Passport device on a desk"><br>
+      <sub>The complete wearable device in use</sub>
+    </td>
+  </tr>
+</table>
 
 ## Controls
 

@@ -36,6 +36,18 @@ Store reusable source images and generated display assets in `images/`.
   72 × 96 full-portrait avatar created by `tools/generate_profile_images.py` for the
   240 × 320 display.
 
+### Real-device screenshots
+
+- `screenshots/ai-passport-home-closeup.jpg`: close-up README hero showing the
+  personal Passport home and AB-731 app entry on the physical device.
+- `screenshots/ai-passport-home-handheld.jpg`: handheld view used in the README
+  real-device gallery.
+- `screenshots/ai-passport-wearable-view.jpg`: full wearable-device view used in
+  the README gallery and GitHub profile page.
+- All three photos were supplied by the project owner for public project use,
+  resized to 1350 × 1800, and stripped of EXIF, device, and GPS metadata before
+  publication.
+
 ## Music and sound effects
 
 Store reusable music and sound-effect sources in `music/`.
