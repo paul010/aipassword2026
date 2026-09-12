@@ -137,7 +137,10 @@ void passport_home_exit(void)
 
 bool passport_home_key(bsp_btn_t button, bsp_btn_ev_t event)
 {
-    if (event != BSP_BTN_CLICK) {
+    /* Open the selected app as soon as OK goes down. UP/DOWN keep ordinary
+     * click semantics so navigation remains deliberate if more apps are added. */
+    bool immediate_open = button == BSP_BTN_OK && event == BSP_BTN_PRESS;
+    if (!immediate_open && event != BSP_BTN_CLICK) {
         return false;
     }
 

@@ -6,6 +6,9 @@
 
 ## Unreleased
 
+- Made the Passport home OK action respond immediately on button-down, while
+  consuming the matching delayed click so opening AB-731 never also starts or
+  skips its first screen.
 - Added a live date-and-time row to the Passport home screen. The fully offline
   build seeds its software clock from the firmware build time and updates the
   display every minute without covering the portrait, identity, app, or battery.

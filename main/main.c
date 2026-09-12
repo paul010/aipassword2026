@@ -16,6 +16,10 @@
 
 static const char *TAG = "ab731_main";
 static bool s_ab731_active;
+/* Opening the launcher app on PRESS makes OK feel immediate. The button
+ * component later emits CLICK for the same physical press, so consume that
+ * one event instead of accidentally starting the quiz as well. */
+static bool s_consume_entry_ok_click;
 
 /* The Passport has no external real-time clock and this offline app does not
  * connect to Wi-Fi. Seed the software clock from the firmware build time so
@@ -58,6 +62,16 @@ static void on_key(bsp_btn_t button, bsp_btn_ev_t event, void *user)
         return;
     }
     if (s_ab731_active) {
+        if (s_consume_entry_ok_click && button == BSP_BTN_OK) {
+            if (event == BSP_BTN_CLICK) {
+                s_consume_entry_ok_click = false;
+                bsp_lvgl_unlock();
+                return;
+            }
+            if (event == BSP_BTN_LONG) {
+                s_consume_entry_ok_click = false;
+            }
+        }
         if (ab731_app_key(button, event)) {
             s_ab731_active = false;
             passport_home_enter();
@@ -65,6 +79,7 @@ static void on_key(bsp_btn_t button, bsp_btn_ev_t event, void *user)
     } else if (passport_home_key(button, event)) {
         passport_home_exit();
         s_ab731_active = true;
+        s_consume_entry_ok_click = event == BSP_BTN_PRESS;
         ab731_app_enter();
     }
     bsp_lvgl_unlock();
