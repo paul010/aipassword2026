@@ -14,3 +14,6 @@ int bsp_battery_soc(void);
 
 // 电池电压 mV;读失败返回 -1。
 int bsp_battery_mv(void);
+
+// Put the initialized CW2017 into its low-power state before MCU deep sleep.
+esp_err_t bsp_battery_sleep(void);

@@ -201,3 +201,8 @@ int bsp_battery_mv(void) {
     uint32_t raw = ((uint32_t)b[0] << 8 | b[1]) & 0x3FFF;   // 14bit
     return (int)((raw * 3125) / 10000);                     // raw * 312.5uV → mV
 }
+
+esp_err_t bsp_battery_sleep(void) {
+    if (!s_dev) return ESP_ERR_INVALID_STATE;
+    return cw_enter_sleep() == 0 ? ESP_OK : ESP_FAIL;
+}

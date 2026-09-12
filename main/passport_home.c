@@ -27,7 +27,7 @@ static void add_battery(lv_obj_t *screen)
     if (s_battery_percent < 0) {
         return;
     }
-    lv_obj_t *label = ui_pixel_label(screen, "", &lv_font_montserrat_14, UI_INK);
+    lv_obj_t *label = ui_pixel_label(screen, "", &lv_font_montserrat_14, UI_PAPER);
     lv_label_set_text_fmt(label, "%d%%", s_battery_percent);
     lv_obj_align(label, LV_ALIGN_TOP_RIGHT, -9, 47);
 }
@@ -77,10 +77,17 @@ static lv_obj_t *add_framed_image(lv_obj_t *parent, const lv_image_dsc_t *source
 static void render_home(void)
 {
     stop_clock();
+    /* The no-PSRAM board uses a fixed 24 KB LVGL pool. Free the previous
+     * page's widgets before allocating the next page so two complete pages do
+     * not coexist briefly and exhaust the animation/widget allocator. */
+    lv_obj_t *old_screen = lv_screen_active();
+    if (old_screen != NULL) {
+        lv_obj_clean(old_screen);
+    }
     lv_obj_t *screen = ui_pixel_screen_create("AI PASSPORT");
     add_battery(screen);
 
-    s_clock_label = ui_pixel_label(screen, "", &lv_font_montserrat_12, UI_INK);
+    s_clock_label = ui_pixel_label(screen, "", &lv_font_montserrat_12, UI_PAPER);
     lv_obj_set_pos(s_clock_label, 12, 48);
     update_clock(NULL);
     s_clock_timer = lv_timer_create(update_clock, 30000, NULL);
@@ -89,17 +96,17 @@ static void render_home(void)
      * the screen itself so no nested card can clip the copy. */
     add_framed_image(screen, &profile_avatar_image, 12, 68, 72, 96);
 
-    lv_obj_t *name = ui_pixel_label(screen, "DALEI", &lv_font_montserrat_20, UI_INK);
+    lv_obj_t *name = ui_pixel_label(screen, "DALEI", &lv_font_montserrat_20, UI_PAPER);
     lv_obj_set_pos(name, 98, 77);
     lv_obj_t *role = ui_pixel_label(screen, "AI CREATOR", &lv_font_montserrat_14,
-                                    UI_INK);
+                                    UI_PAPER);
     lv_obj_set_pos(role, 98, 108);
     lv_obj_t *tagline = ui_pixel_label(screen, "LEARN + SHARE",
-                                       &lv_font_montserrat_12, UI_INK);
+                                       &lv_font_montserrat_12, UI_PAPER);
     lv_obj_set_pos(tagline, 98, 136);
 
     lv_obj_t *apps_label = ui_pixel_label(screen, "MY APPS",
-                                           &lv_font_montserrat_12, UI_INK);
+                                           &lv_font_montserrat_12, UI_PAPER);
     lv_obj_set_pos(apps_label, 15, 172);
 
     lv_obj_t *app = ui_pixel_panel_create(screen, 13, 190, 214, 88, UI_YELLOW);
@@ -137,27 +144,12 @@ void passport_home_exit(void)
 
 bool passport_home_key(bsp_btn_t button, bsp_btn_ev_t event)
 {
-    /* Open the selected app as soon as OK goes down. UP/DOWN keep ordinary
-     * click semantics so navigation remains deliberate if more apps are added. */
-    bool immediate_open = button == BSP_BTN_OK && event == BSP_BTN_PRESS;
-    if (!immediate_open && event != BSP_BTN_CLICK) {
+    /* Match the upstream launcher contract: a complete OK click opens the
+     * selected app. PRESS is intentionally ignored because the button driver
+     * will emit CLICK after release; handling both would apply one physical
+     * press twice across two screens. */
+    if (button != BSP_BTN_OK || event != BSP_BTN_CLICK) {
         return false;
     }
-
-    passport_nav_input_t input;
-    if (button == BSP_BTN_UP) {
-        input = PASSPORT_NAV_UP;
-    } else if (button == BSP_BTN_DOWN) {
-        input = PASSPORT_NAV_DOWN;
-    } else if (button == BSP_BTN_OK) {
-        input = PASSPORT_NAV_OK;
-    } else {
-        return false;
-    }
-
-    passport_nav_action_t action = passport_nav_apply(&s_nav, input);
-    if (action == PASSPORT_NAV_REDRAW) {
-        render_home();
-    }
-    return action == PASSPORT_NAV_OPEN_AB731;
+    return passport_nav_apply(&s_nav, PASSPORT_NAV_OK) == PASSPORT_NAV_OPEN_AB731;
 }

@@ -36,6 +36,10 @@ run_static_checks() {
         tests/test_passport_nav.c main/passport_nav.c \
         -o "${test_dir}/test_passport_nav"
     "${test_dir}/test_passport_nav"
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain \
+        tests/test_idle_power.c main/idle_power.c \
+        -o "${test_dir}/test_idle_power"
+    "${test_dir}/test_idle_power"
     python3 tests/test_verify_firmware.py
     rm -rf "${test_dir}"
     echo "Host tests: PASS"

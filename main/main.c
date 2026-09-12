@@ -6,8 +6,15 @@
 #include "bsp_i2c.h"
 #include "bsp_pins.h"
 #include "esp_log.h"
+#include "esp_sleep.h"
+#include "esp_timer.h"
+#include "idle_power.h"
 #include "nvs_flash.h"
 #include "passport_home.h"
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
+#include "freertos/task.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -15,11 +22,67 @@
 #include <time.h>
 
 static const char *TAG = "ab731_main";
+#define IDLE_SLEEP_MS (5U * 60U * 1000U)
+
 static bool s_ab731_active;
-/* Opening the launcher app on PRESS makes OK feel immediate. The button
- * component later emits CLICK for the same physical press, so consume that
- * one event instead of accidentally starting the quiz as well. */
-static bool s_consume_entry_ok_click;
+static volatile uint32_t s_last_activity_ms;
+static bool s_accept_buttons;
+static QueueHandle_t s_button_queue;
+
+typedef struct {
+    bsp_btn_t button;
+    bsp_btn_ev_t event;
+} button_message_t;
+
+static uint32_t now_ms(void)
+{
+    return (uint32_t)(esp_timer_get_time() / 1000);
+}
+
+static void note_activity(void)
+{
+    s_last_activity_ms = now_ms();
+}
+
+static void enter_idle_sleep(void)
+{
+    if (bsp_button_any_pressed()) {
+        note_activity();
+        return;
+    }
+
+    esp_err_t result = esp_deep_sleep_enable_gpio_wakeup(
+        1ULL << BSP_BTN_GPIO, ESP_GPIO_WAKEUP_GPIO_LOW);
+    if (result != ESP_OK) {
+        ESP_LOGE(TAG, "Could not arm button wake source: %s",
+                 esp_err_to_name(result));
+        note_activity();
+        return;
+    }
+
+    if (bsp_lvgl_lock(1000)) {
+        result = bsp_display_sleep();
+        if (result != ESP_OK) {
+            ESP_LOGW(TAG, "LCD sleep returned: %s", esp_err_to_name(result));
+        }
+        bsp_display_backlight(0);
+        bsp_lvgl_unlock();
+    } else {
+        bsp_display_backlight(0);
+    }
+
+    result = bsp_battery_sleep();
+    if (result != ESP_OK && result != ESP_ERR_INVALID_STATE) {
+        ESP_LOGW(TAG, "Battery-gauge sleep returned: %s",
+                 esp_err_to_name(result));
+    }
+    result = bsp_button_deinit();
+    if (result != ESP_OK) {
+        ESP_LOGW(TAG, "Button shutdown returned: %s", esp_err_to_name(result));
+    }
+    ESP_LOGI(TAG, "Five minutes idle; entering deep sleep (any key wakes)");
+    esp_deep_sleep_start();
+}
 
 /* The Passport has no external real-time clock and this offline app does not
  * connect to Wi-Fi. Seed the software clock from the firmware build time so
@@ -53,25 +116,33 @@ static void initialize_offline_clock(void)
     }
 }
 
-// Button callbacks run in the button timer task. Keep them short and hold the
-// LVGL lock while the application changes widgets.
-static void on_key(bsp_btn_t button, bsp_btn_ev_t event, void *user)
+// Button callbacks run in the esp_timer task and must never redraw LVGL. Queue
+// an immutable event for app_main, which owns all navigation and screen work.
+static void button_callback(bsp_btn_t button, bsp_btn_ev_t event, void *user)
 {
     (void)user;
+    button_message_t message = { .button = button, .event = event };
+    if (s_button_queue != NULL) {
+        (void)xQueueSend(s_button_queue, &message, 0);
+    }
+}
+
+static void handle_key(const button_message_t *message)
+{
+    bsp_btn_t button = message->button;
+    bsp_btn_ev_t event = message->event;
+    note_activity();
+    if (!s_accept_buttons) {
+        return;
+    }
+    if (event == BSP_BTN_PRESS) {
+        ESP_LOGI(TAG, "Button press classified as key=%d, ADC=%d mV",
+                 (int)button, bsp_button_read_mv());
+    }
     if (!bsp_lvgl_lock(250)) {
         return;
     }
     if (s_ab731_active) {
-        if (s_consume_entry_ok_click && button == BSP_BTN_OK) {
-            if (event == BSP_BTN_CLICK) {
-                s_consume_entry_ok_click = false;
-                bsp_lvgl_unlock();
-                return;
-            }
-            if (event == BSP_BTN_LONG) {
-                s_consume_entry_ok_click = false;
-            }
-        }
         if (ab731_app_key(button, event)) {
             s_ab731_active = false;
             passport_home_enter();
@@ -79,7 +150,6 @@ static void on_key(bsp_btn_t button, bsp_btn_ev_t event, void *user)
     } else if (passport_home_key(button, event)) {
         passport_home_exit();
         s_ab731_active = true;
-        s_consume_entry_ok_click = event == BSP_BTN_PRESS;
         ab731_app_enter();
     }
     bsp_lvgl_unlock();
@@ -88,6 +158,8 @@ static void on_key(bsp_btn_t button, bsp_btn_ev_t event, void *user)
 void app_main(void)
 {
     ESP_LOGI(TAG, "Starting AB-731 pocket practice");
+    bool woke_from_button =
+        esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_GPIO;
     initialize_offline_clock();
 
     esp_err_t nvs_result = nvs_flash_init();
@@ -125,6 +197,31 @@ void app_main(void)
     passport_home_init(battery_percent);
     passport_home_enter();
     bsp_lvgl_unlock();
-    ESP_ERROR_CHECK(bsp_button_init(on_key, NULL));
+    s_button_queue = xQueueCreate(8, sizeof(button_message_t));
+    if (s_button_queue == NULL) {
+        ESP_LOGE(TAG, "Could not create button event queue");
+        return;
+    }
+    ESP_ERROR_CHECK(bsp_button_init(button_callback, NULL));
+    s_accept_buttons = !woke_from_button;
+    note_activity();
     ESP_LOGI(TAG, "AI Passport home ready; AB-731 available as a sub-app");
+
+    for (;;) {
+        bool pressed = bsp_button_any_pressed();
+        if (!s_accept_buttons && !pressed) {
+            s_accept_buttons = true;
+            note_activity();
+        }
+
+        button_message_t message;
+        if (xQueueReceive(s_button_queue, &message,
+                          pdMS_TO_TICKS(100)) == pdTRUE) {
+            handle_key(&message);
+        }
+        if (s_accept_buttons &&
+            idle_power_expired(s_last_activity_ms, now_ms(), IDLE_SLEEP_MS)) {
+            enter_idle_sleep();
+        }
+    }
 }

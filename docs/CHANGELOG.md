@@ -6,9 +6,19 @@
 
 ## Unreleased
 
-- Made the Passport home OK action respond immediately on button-down, while
-  consuming the matching delayed click so opening AB-731 never also starts or
-  skips its first screen.
+- Fixed AB-731 entry and later page changes exhausting LVGL's fixed 24 KB
+  pool by releasing the previous screen contents before constructing the next
+  screen. A short, released `OK` click now follows the upstream launcher event
+  contract and opens the app exactly once.
+- Added the original project's wearable power behavior: after five minutes
+  without a key event, the LCD controller, backlight, battery gauge, button ADC,
+  and MCU enter their appropriate sleep states; any physical key wakes the
+  device. Wake-key release is ignored so waking never opens an app by accident.
+- Changed all text drawn directly on the blue home background to
+  high-contrast white.
+- Moved navigation and LVGL redraws out of the ESP timer's button callback and
+  into the application task through a bounded event queue, preventing OK from
+  stalling the timer task and triggering the watchdog.
 - Added a live date-and-time row to the Passport home screen. The fully offline
   build seeds its software clock from the firmware build time and updates the
   display every minute without covering the portrait, identity, app, or battery.

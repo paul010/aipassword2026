@@ -70,6 +70,14 @@ static void add_battery(lv_obj_t *screen)
 
 static lv_obj_t *new_screen(const char *title)
 {
+    /* Release old widgets and their animations before constructing the next
+     * AB-731 page. Keeping only the empty root loaded avoids the transient
+     * two-page memory peak that previously halted in LV_ASSERT_MALLOC. */
+    lv_obj_t *old_screen = lv_screen_active();
+    if (old_screen != NULL) {
+        lv_obj_clean(old_screen);
+    }
+    s_mascot = NULL;
     s_screen = ui_pixel_screen_create(title);
     add_battery(s_screen);
     return s_screen;
