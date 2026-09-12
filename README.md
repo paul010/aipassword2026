@@ -13,7 +13,7 @@ for the FoloToy AI Passport. It shows a full portrait, creator identity, date,
 time, and battery status, while keeping independently selectable apps below.
 
 The first bundled app is an offline AB-731 pocket-practice experience. It
-contains 18 original study questions aligned with the Microsoft Learn skills
+contains 100 original study questions aligned with the Microsoft Learn skills
 measured from July 22, 2026. They are learning material, not live exam items.
 
 ## Highlights
@@ -50,6 +50,7 @@ measured from July 22, 2026. They are learning material, not live exam items.
   highlight, then press `OK` to submit.
 - Feedback: press `OK` for the next question.
 - Inside AB-731: hold `OK` to return to the Passport profile home.
+- Inside AB-731: hold `UP` to clear saved answers and restart from the app home.
 
 Accuracy, mistakes, and the latest question are saved in the device NVS. Flash
 writes run in a worker task so button handling remains responsive.

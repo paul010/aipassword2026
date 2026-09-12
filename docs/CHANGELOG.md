@@ -6,6 +6,12 @@
 
 ## Unreleased
 
+- Expanded the AB-731 study bank from 18 to 100 original four-choice questions,
+  distributed across the three official skill areas at 40/38/22. Mistake
+  tracking now spans all 100 questions instead of being limited to the first 32.
+- Added visible navigation controls on every AB-731 page: hold `OK` to return
+  to the Passport and hold `UP` to clear saved answers, reset the active quiz,
+  and return to the AB-731 start page with confirmation.
 - Fixed AB-731 entry and later page changes exhausting LVGL's fixed 24 KB
   pool by releasing the previous screen contents before constructing the next
   screen. A short, released `OK` click now follows the upstream launcher event

@@ -11,8 +11,9 @@
 #include "ui_pixel.h"
 
 #include <stdio.h>
+#include <string.h>
 
-#define STATS_VERSION 1
+#define STATS_VERSION 2
 #define STORAGE_NAMESPACE "ab731"
 #define STORAGE_KEY "stats"
 
@@ -29,7 +30,7 @@ typedef struct {
     uint16_t reserved;
     uint32_t total_answers;
     uint32_t correct_answers;
-    uint32_t wrong_mask;
+    uint32_t wrong_words[AB731_WRONG_WORD_COUNT];
 } persisted_stats_t;
 
 static const char *TAG = "ab731_app";
@@ -41,20 +42,34 @@ static ab731_quiz_t s_quiz;
 static lv_obj_t *s_screen;
 static lv_obj_t *s_mascot;
 static QueueHandle_t s_save_queue;
+static bool s_reset_notice;
 
 static void render_home(void);
 static void render_question(void);
 static void render_feedback(void);
 static void render_done(void);
 
-static unsigned wrong_count(uint32_t mask)
+static unsigned wrong_count(const uint32_t words[AB731_WRONG_WORD_COUNT])
 {
     unsigned count = 0;
-    while (mask != 0) {
-        count += mask & 1U;
-        mask >>= 1;
+    for (uint8_t word = 0; word < AB731_WRONG_WORD_COUNT; ++word) {
+        uint32_t value = words[word];
+        while (value != 0) {
+            count += value & 1U;
+            value >>= 1;
+        }
     }
     return count;
+}
+
+static void mark_wrong(uint8_t index, bool wrong)
+{
+    uint32_t bit = 1UL << (index % 32);
+    if (wrong) {
+        s_stats.wrong_words[index / 32] |= bit;
+    } else {
+        s_stats.wrong_words[index / 32] &= ~bit;
+    }
 }
 
 static void add_battery(lv_obj_t *screen)
@@ -102,6 +117,14 @@ static lv_obj_t *wrapped_label(lv_obj_t *parent, const char *text, int width,
     return label;
 }
 
+static void add_global_controls(lv_obj_t *screen)
+{
+    lv_obj_t *help = ui_pixel_label(screen,
+                                    "HOLD OK: PASSPORT  HOLD UP: RESET",
+                                    &lv_font_montserrat_12, UI_INK);
+    lv_obj_align(help, LV_ALIGN_TOP_MID, 0, 294);
+}
+
 // This worker owns all runtime NVS writes. The button callback only overwrites
 // a one-element queue with the latest immutable snapshot.
 static void save_worker(void *argument)
@@ -134,6 +157,18 @@ static void queue_save(void)
     }
 }
 
+static void reset_progress(void)
+{
+    memset(&s_stats, 0, sizeof(s_stats));
+    s_stats.version = STATS_VERSION;
+    memset(&s_quiz, 0, sizeof(s_quiz));
+    s_mistakes_only = false;
+    s_reset_notice = true;
+    queue_save();
+    ESP_LOGI(TAG, "AB-731 progress reset");
+    render_home();
+}
+
 static void load_stats(void)
 {
     nvs_handle_t handle;
@@ -159,7 +194,7 @@ static void show_no_mistakes(void)
 
 static void start_selected_mode(void)
 {
-    ab731_quiz_start(&s_quiz, s_stats.wrong_mask, s_mistakes_only);
+    ab731_quiz_start(&s_quiz, s_stats.wrong_words, s_mistakes_only);
     if (ab731_quiz_is_complete(&s_quiz)) {
         show_no_mistakes();
         return;
@@ -178,24 +213,30 @@ static void render_home(void)
                                        UI_SKY_DARK);
     lv_obj_align(eyebrow, LV_ALIGN_TOP_MID, 0, 0);
 
-    lv_obj_t *mode = ui_pixel_label(panel,
-        s_mistakes_only ? "MODE  MISTAKES" : "MODE  ALL 18",
-        &lv_font_montserrat_20, UI_INK);
+    lv_obj_t *mode = ui_pixel_label(panel, "", &lv_font_montserrat_20, UI_INK);
+    if (s_mistakes_only) {
+        lv_label_set_text(mode, "MODE  MISTAKES");
+    } else {
+        lv_label_set_text_fmt(mode, "MODE  ALL %u", AB731_QUESTION_COUNT);
+    }
     lv_obj_align(mode, LV_ALIGN_TOP_MID, 0, 28);
 
     unsigned accuracy = s_stats.total_answers == 0 ? 0 :
         (unsigned)((s_stats.correct_answers * 100U) / s_stats.total_answers);
     lv_obj_t *stats = ui_pixel_label(panel, "", &lv_font_montserrat_14, UI_INK);
     lv_label_set_text_fmt(stats, "Accuracy %u%%\nMistakes %u\n\nUP/DOWN: MODE\nOK: START",
-                          accuracy, wrong_count(s_stats.wrong_mask));
+                          accuracy, wrong_count(s_stats.wrong_words));
     lv_obj_set_style_text_align(stats, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_align(stats, LV_ALIGN_TOP_MID, 0, 57);
 
-    lv_obj_t *note = wrapped_label(screen, "Original study questions - not exam items",
+    lv_obj_t *note = wrapped_label(screen,
+                                   s_reset_notice ? "PROGRESS RESET" :
+                                   "Original study questions - not exam items",
                                    168, &lv_font_montserrat_14, UI_INK);
     lv_obj_set_style_text_align(note, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_set_pos(note, 36, 214);
     s_mascot = ui_pixel_mascot_create(screen, 101, 238);
+    add_global_controls(screen);
     replace_screen(screen);
 }
 
@@ -237,6 +278,7 @@ static void render_question(void)
     lv_obj_t *help = ui_pixel_label(screen, "UP/DOWN: SELECT  OK: SUBMIT",
                                     &lv_font_montserrat_14, UI_INK);
     lv_obj_set_pos(help, 9, 273);
+    add_global_controls(screen);
     replace_screen(screen);
 }
 
@@ -259,10 +301,11 @@ static void render_feedback(void)
                                      &lv_font_montserrat_14, UI_INK);
     lv_obj_set_pos(reason, 0, 76);
 
-    lv_obj_t *help = ui_pixel_label(screen, "OK: NEXT   HOLD OK: HOME",
+    lv_obj_t *help = ui_pixel_label(screen, "OK: NEXT",
                                     &lv_font_montserrat_14, UI_INK);
     lv_obj_set_pos(help, 16, 258);
     s_mascot = ui_pixel_mascot_create(screen, 101, 238);
+    add_global_controls(screen);
     replace_screen(screen);
 }
 
@@ -279,9 +322,10 @@ static void render_done(void)
                           (unsigned)(s_quiz.session_correct * 100U / s_quiz.order_count));
     lv_obj_set_style_text_align(score, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_center(score);
-    lv_obj_t *help = ui_pixel_label(screen, "OK: HOME", &lv_font_montserrat_14, UI_INK);
+    lv_obj_t *help = ui_pixel_label(screen, "OK: APP HOME", &lv_font_montserrat_14, UI_INK);
     lv_obj_set_pos(help, 84, 226);
     s_mascot = ui_pixel_mascot_create(screen, 101, 238);
+    add_global_controls(screen);
     replace_screen(screen);
 }
 
@@ -305,6 +349,10 @@ void ab731_app_enter(void)
 
 bool ab731_app_key(bsp_btn_t button, bsp_btn_ev_t event)
 {
+    if (button == BSP_BTN_UP && event == BSP_BTN_LONG) {
+        reset_progress();
+        return false;
+    }
     if (button == BSP_BTN_OK && event == BSP_BTN_LONG) {
         return true;
     }
@@ -314,9 +362,11 @@ bool ab731_app_key(bsp_btn_t button, bsp_btn_ev_t event)
 
     if (s_page == PAGE_HOME) {
         if (button == BSP_BTN_UP || button == BSP_BTN_DOWN) {
+            s_reset_notice = false;
             s_mistakes_only = !s_mistakes_only;
             render_home();
         } else if (button == BSP_BTN_OK) {
+            s_reset_notice = false;
             start_selected_mode();
         }
         return false;
@@ -332,9 +382,9 @@ bool ab731_app_key(bsp_btn_t button, bsp_btn_ev_t event)
             ++s_stats.total_answers;
             if (correct) {
                 ++s_stats.correct_answers;
-                s_stats.wrong_mask &= ~(1UL << question_index);
+                mark_wrong(question_index, false);
             } else {
-                s_stats.wrong_mask |= 1UL << question_index;
+                mark_wrong(question_index, true);
             }
             s_stats.last_question = question_index;
             queue_save();
