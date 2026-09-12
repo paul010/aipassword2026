@@ -6,6 +6,29 @@
 
 ## Unreleased
 
+- Added a live date-and-time row to the Passport home screen. The fully offline
+  build seeds its software clock from the firmware build time and updates the
+  display every minute without covering the portrait, identity, app, or battery.
+- Replaced the square face crop with a 72 x 96 full 3:4 portrait that keeps the
+  hair, face, neckerchief, and upper body visible in the left identity column.
+- Restored the requested portrait-left and identity-right header, with the
+  authored AB-731 app in a dedicated section below. Identity and app labels are
+  attached directly to the screen to avoid container clipping.
+- Rebuilt the home screen as a centered vertical stack where the portrait,
+  name, role, introduction, and app section each occupy an independent row.
+  Identity copy is no longer clipped inside a nested panel.
+- Reduced the MY APPS section-label size and widened the identity card with
+  tighter padding and copy sizing so the avatar and full introduction remain visible.
+- Reworked the Passport home into a single-avatar layout with clearer identity
+  copy and app-menu hierarchy. AB-731 starts highlighted and opens with one OK
+  press, while boot still stays on the Passport home. The avatar keeps the new
+  light-blue pixel-sky background, and holding OK inside the exam returns home.
+
+- Show all four AB-731 answer choices at once and use UP/DOWN only to move the
+  selection highlight.
+
+- Replaced the hardware demo menu with an offline AB-731 pocket-practice app featuring three-button answer selection, immediate explanations, all-question and mistake-review modes, battery status, session scoring, and asynchronously persisted progress. Added 18 original practice questions aligned with the Microsoft Learn skills measured from July 22, 2026, plus host tests for the quiz state machine.
+
 - Added the supplied 80-byte CW2017 profile for the specified 520 mAh cell, including content/update-flag checks, verified writes, the required restart sequence, and bounded SOC-readiness polling.
 
 - Expanded the environment bootstrap document: added Espressif's Git service mirror (`git.espressif.com.cn`) as the preferred mainland-China route for ESP-IDF v5.5.3 and its submodules, documented submodule long-wait/timeout handling, in-place repair, and the pinned-commit shallow fetch for large submodules such as `esp32-wifi-lib`, warned about stale per-repository Jihulab `insteadOf` residue, and added the official offline release archive as a last-resort fallback (learned from `esp-mosaico/esp-mosaico-vibe`).

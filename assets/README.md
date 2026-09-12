@@ -26,6 +26,16 @@ Store reusable source images and generated display assets in `images/`.
 - Preserve editable sources where licensing permits, and record the source and license.
 - Never commit device QR secrets, credentials, or personal data in images.
 
+### AI Passport profile background
+
+- `images/dalei-ai-passport-sky-v2.png`: project profile source image with the
+  existing clay avatar retained and its red background replaced by a light-blue
+  pixel sky. Generated with the built-in OpenAI image tool from the owner's
+  existing public avatar with permission for this project.
+- `main/profile_images.c`: generated RGB565 derivative containing only the
+  72 × 96 full-portrait avatar created by `tools/generate_profile_images.py` for the
+  240 × 320 display.
+
 ## Music and sound effects
 
 Store reusable music and sound-effect sources in `music/`.

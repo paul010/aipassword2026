@@ -24,6 +24,14 @@
 - 许可允许时保留可编辑源文件，并记录来源与许可。
 - 图片中不得包含设备二维码秘密、凭证或个人数据。
 
+### AI Passport 个人背景
+
+- `images/dalei-ai-passport-sky-v2.png`：保留现有黏土头像，把红色背景替换为
+  浅蓝像素天空。使用内置 OpenAI 图像工具基于项目所有者已有的公开头像生成，
+  已获准用于本项目。
+- `main/profile_images.c`：由 `tools/generate_profile_images.py` 生成的 RGB565
+  衍生资源，仅包含 72 × 96 完整人物头像，供 240 × 320 屏幕使用。
+
 ## 音乐与音效（music）
 
 可复用的音乐与音效源码放在 `music/`。
