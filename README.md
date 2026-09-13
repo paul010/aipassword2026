@@ -48,6 +48,12 @@ measured from July 22, 2026. They are learning material, not live exam items.
       <sub>Early four-choice screen — not proof of the current 100-question build</sub>
     </td>
   </tr>
+  <tr>
+    <td colspan="2" align="center">
+      <img src="assets/screenshots/ab731-result-v18-legacy.jpg" width="50%" alt="Early AB-731 answer explanation running on the physical device"><br>
+      <sub>Early result screen — immediate answer and explanation feedback</sub>
+    </td>
+  </tr>
 </table>
 
 The two lower photos visibly show the earlier 18-question build. The repository

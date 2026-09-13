@@ -48,7 +48,9 @@ Store reusable source images and generated display assets in `images/`.
   the 18-question build; retained only as an iteration record.
 - `screenshots/ab731-question-v18-legacy.jpg`: early four-choice question screen
   visibly showing `Q 1/18`; it must not be used as 100-question device proof.
-- All five photos were supplied by the project owner for public project use,
+- `screenshots/ab731-result-v18-legacy.jpg`: early result screen showing the
+  immediate answer and explanation flow; retained as an interaction record.
+- All six photos were supplied by the project owner for public project use,
   resized to 1350 × 1800, and stripped of EXIF, device, and GPS metadata before
   publication.
 

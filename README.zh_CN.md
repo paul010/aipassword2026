@@ -47,6 +47,12 @@
       <sub>早期四选一界面——不能作为当前 100 题版本的真机证明</sub>
     </td>
   </tr>
+  <tr>
+    <td colspan="2" align="center">
+      <img src="assets/screenshots/ab731-result-v18-legacy.jpg" width="50%" alt="AB-731 早期答题解析真机界面"><br>
+      <sub>早期答题解析界面——提交后立即显示答案和说明</sub>
+    </td>
+  </tr>
 </table>
 
 下方两张照片中清楚显示的是早期 18 题版本。当前仓库已经包含 100 道原创练习题，
