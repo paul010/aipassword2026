@@ -37,7 +37,20 @@
       <sub>实际运行中的完整穿戴设备</sub>
     </td>
   </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="assets/screenshots/ab731-home-v18-legacy.jpg" alt="AB-731 早期 18 题版本真机首页"><br>
+      <sub>早期 18 题版本——作为真实迭代记录保留</sub>
+    </td>
+    <td width="50%" align="center">
+      <img src="assets/screenshots/ab731-question-v18-legacy.jpg" alt="AB-731 早期四选一答题真机界面"><br>
+      <sub>早期四选一界面——不能作为当前 100 题版本的真机证明</sub>
+    </td>
+  </tr>
 </table>
+
+下方两张照片中清楚显示的是早期 18 题版本。当前仓库已经包含 100 道原创练习题，
+但在补拍真实显示 `MODE ALL 100` 的设备画面前，不把 100 题固件描述为已完成真机验证。
 
 ## 按键
 

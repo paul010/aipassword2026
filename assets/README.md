@@ -44,9 +44,19 @@ Store reusable source images and generated display assets in `images/`.
   real-device gallery.
 - `screenshots/ai-passport-wearable-view.jpg`: full wearable-device view used in
   the README gallery and GitHub profile page.
-- All three photos were supplied by the project owner for public project use,
+- `screenshots/ab731-home-v18-legacy.jpg`: early AB-731 app home visibly showing
+  the 18-question build; retained only as an iteration record.
+- `screenshots/ab731-question-v18-legacy.jpg`: early four-choice question screen
+  visibly showing `Q 1/18`; it must not be used as 100-question device proof.
+- All five photos were supplied by the project owner for public project use,
   resized to 1350 × 1800, and stripped of EXIF, device, and GPS metadata before
   publication.
+
+### Publishing illustration
+
+- `publish/ab731-cover-illustration.png`: owner-approved AB-731 learning-flow
+  illustration. It is suitable for README, publishing, and video B-roll as an
+  explicitly illustrative asset, not as a physical-device screenshot.
 
 ## Music and sound effects
 

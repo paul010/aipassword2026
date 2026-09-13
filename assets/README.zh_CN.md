@@ -39,8 +39,17 @@
 - `screenshots/ai-passport-home-handheld.jpg`：README 真机展示中的手持近景。
 - `screenshots/ai-passport-wearable-view.jpg`：README 图集和 GitHub 个人首页使用的
   完整穿戴设备照片。
-- 三张照片均由项目所有者提供并授权公开用于本项目；发布前已缩放为
+- `screenshots/ab731-home-v18-legacy.jpg`：清楚显示 18 题的 AB-731 早期真机首页，
+  仅作为迭代记录保留。
+- `screenshots/ab731-question-v18-legacy.jpg`：清楚显示 `Q 1/18` 的早期四选一界面，
+  不能作为 100 题版本的真机证明。
+- 五张照片均由项目所有者提供并授权公开用于本项目；发布前已缩放为
   1350 × 1800，并清除 EXIF、设备型号和 GPS 位置信息。
+
+### 发布插画
+
+- `publish/ab731-cover-illustration.png`：项目所有者确认可使用的 AB-731 学习流程插画。
+  可用于 README、发布资料和视频 B-roll，但必须作为玩法示意，不冒充真机截图。
 
 ## 音乐与音效（music）
 

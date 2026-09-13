@@ -38,7 +38,22 @@ measured from July 22, 2026. They are learning material, not live exam items.
       <sub>The complete wearable device in use</sub>
     </td>
   </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="assets/screenshots/ab731-home-v18-legacy.jpg" alt="Early 18-question AB-731 app home running on the physical device"><br>
+      <sub>Early 18-question build — retained as an iteration record</sub>
+    </td>
+    <td width="50%" align="center">
+      <img src="assets/screenshots/ab731-question-v18-legacy.jpg" alt="Early AB-731 four-choice question screen running on the physical device"><br>
+      <sub>Early four-choice screen — not proof of the current 100-question build</sub>
+    </td>
+  </tr>
 </table>
+
+The two lower photos visibly show the earlier 18-question build. The repository
+now contains 100 original study questions, but a new on-device photo showing
+`MODE ALL 100` is still needed before the gallery can claim that firmware as
+physically verified.
 
 ## Controls
 
